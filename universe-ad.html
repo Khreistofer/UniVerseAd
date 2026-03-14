@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>UniVerse — Where Every Student Finds Their World</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:100%;min-height:100%;background:#080820;font-family:'Sora',sans-serif;color:white;}
+
+  /* ── PAGE WRAPPER ── */
+  #app{width:100%;min-height:100vh;display:flex;flex-direction:column;align-items:center;background:#080820;}
+
+  /* ── AD CONTAINER ── */
+  #universe-ad{
+    width:100%;max-width:900px;aspect-ratio:16/9;
+    background:#080820;position:relative;overflow:hidden;cursor:pointer;
+    border-radius:0 0 16px 16px;
+  }
+  canvas#stars{position:absolute;inset:0;width:100%;height:100%;}
+
+  .scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:opacity .8s ease;pointer-events:none;}
+  .scene.active{opacity:1;pointer-events:auto;}
+
+  .globe-container{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+  svg.globe{width:min(55%,320px);animation:floatGlobe 6s ease-in-out infinite;}
+  @keyframes floatGlobe{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-12px) rotate(2deg);}}
+  .orbit{transform-origin:center;animation:orbit 8s linear infinite;}
+  .orbit-2{animation-duration:12s;animation-direction:reverse;}
+  .orbit-3{animation-duration:5s;}
+  @keyframes orbit{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
+  .scene-text{position:absolute;text-align:center;color:white;z-index:10;padding:0 5%;}
+  .tagline{font-size:clamp(9px,2vw,18px);font-weight:300;letter-spacing:.25em;color:#7ec8ff;text-transform:uppercase;margin-bottom:.5em;opacity:0;transform:translateY(20px);transition:all .7s ease .3s;}
+  .headline{font-size:clamp(18px,5vw,52px);font-weight:700;line-height:1.1;background:linear-gradient(135deg,#fff 0%,#a8d4ff 50%,#c9a0ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;opacity:0;transform:translateY(20px);transition:all .7s ease .5s;margin-bottom:.4em;}
+  .subline{font-size:clamp(9px,1.6vw,16px);font-weight:300;color:rgba(255,255,255,.6);letter-spacing:.05em;opacity:0;transform:translateY(20px);transition:all .7s ease .7s;margin-bottom:1.2em;}
+  .scene.active .tagline,.scene.active .headline,.scene.active .subline,.scene.active .cta-btn{opacity:1;transform:translateY(0);}
+
+  .cta-btn{display:inline-block;padding:.55em 1.8em;background:linear-gradient(135deg,#4a90f5,#9b5dff);border-radius:50px;font-size:clamp(9px,1.4vw,13px);font-weight:600;color:white;letter-spacing:.1em;text-transform:uppercase;border:none;cursor:pointer;opacity:0;transform:translateY(20px);transition:all .7s ease .9s;}
+
+  .feature-cards{display:flex;gap:clamp(5px,1.2vw,12px);padding:0 5%;width:100%;justify-content:center;position:absolute;bottom:12%;}
+  .feat-card{background:rgba(255,255,255,.05);border:.5px solid rgba(255,255,255,.12);border-radius:10px;padding:clamp(5px,1vw,10px) clamp(7px,1.3vw,14px);text-align:center;opacity:0;transform:translateY(30px);transition:opacity .5s ease,transform .5s ease;flex:1;max-width:120px;}
+  .feat-card.show{opacity:1;transform:translateY(0);}
+  .feat-icon{font-size:clamp(14px,2.2vw,22px);margin-bottom:3px;display:block;}
+  .feat-label{font-size:clamp(7px,1.1vw,10px);color:rgba(255,255,255,.7);letter-spacing:.04em;}
+
+  .logo-reveal{font-size:clamp(30px,8vw,80px);font-weight:700;background:linear-gradient(135deg,#4a90f5 0%,#9b5dff 50%,#ff6eb4 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;opacity:0;transform:scale(.7);transition:all .9s cubic-bezier(.175,.885,.32,1.275) .2s;}
+  .scene.active .logo-reveal{opacity:1;transform:scale(1);}
+  .logo-sub{font-size:clamp(8px,1.4vw,13px);font-weight:300;letter-spacing:.4em;color:rgba(255,255,255,.5);text-transform:uppercase;margin-top:.4em;opacity:0;transition:opacity .7s ease .8s;}
+  .scene.active .logo-sub{opacity:1;}
+
+  .flag-avatar{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.07);border:.5px solid rgba(255,255,255,.15);border-radius:50px;padding:5px 12px 5px 6px;font-size:clamp(8px,1.2vw,11px);color:rgba(255,255,255,.8);opacity:0;transform:translateY(10px);transition:opacity .4s ease,transform .4s ease;white-space:nowrap;}
+  .flag-avatar.show{opacity:1;transform:translateY(0);}
+  .avatar-circle{width:clamp(20px,2.8vw,26px);height:clamp(20px,2.8vw,26px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(9px,1.4vw,13px);flex-shrink:0;}
+
+  .connection-line{stroke:rgba(126,200,255,.3);stroke-width:.5;animation:pulse-line 2s ease-in-out infinite;}
+  @keyframes pulse-line{0%,100%{opacity:.15;}50%{opacity:.5;}}
+
+  .progress-bar{position:absolute;bottom:0;left:0;height:2px;background:linear-gradient(90deg,#4a90f5,#9b5dff);width:0%;z-index:20;transition:width linear;}
+  .scene-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:20;}
+  .dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.25);transition:background .3s,transform .3s;}
+  .dot.active{background:#7ec8ff;transform:scale(1.4);}
+
+  /* ── NEWSLETTER SECTION ── */
+  #newsletter-section{
+    width:100%;max-width:900px;
+    background:linear-gradient(180deg,#0d0d2e 0%,#080820 100%);
+    padding:clamp(30px,5vw,60px) clamp(20px,5vw,60px);
+    text-align:center;
+    border-top:.5px solid rgba(126,200,255,.15);
+  }
+  .nl-eyebrow{font-size:clamp(9px,1.3vw,12px);font-weight:300;letter-spacing:.3em;color:#7ec8ff;text-transform:uppercase;margin-bottom:.8em;}
+  .nl-heading{font-size:clamp(20px,4vw,40px);font-weight:700;background:linear-gradient(135deg,#fff 0%,#a8d4ff 60%,#c9a0ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.6em;line-height:1.15;}
+  .nl-sub{font-size:clamp(11px,1.5vw,15px);color:rgba(255,255,255,.5);font-weight:300;margin-bottom:2em;line-height:1.7;max-width:520px;margin-left:auto;margin-right:auto;}
+
+  #nl-form{display:flex;gap:10px;max-width:480px;margin:0 auto;flex-wrap:wrap;justify-content:center;}
+  #nl-name,#nl-email{
+    flex:1;min-width:160px;padding:13px 18px;
+    background:rgba(255,255,255,.06);
+    border:.5px solid rgba(255,255,255,.2);
+    border-radius:50px;color:white;
+    font-family:'Sora',sans-serif;font-size:clamp(11px,1.3vw,13px);
+    outline:none;transition:border-color .3s;
+  }
+  #nl-name::placeholder,#nl-email::placeholder{color:rgba(255,255,255,.35);}
+  #nl-name:focus,#nl-email:focus{border-color:rgba(126,200,255,.6);}
+  #nl-submit{
+    padding:13px 28px;background:linear-gradient(135deg,#4a90f5,#9b5dff);
+    border:none;border-radius:50px;color:white;
+    font-family:'Sora',sans-serif;font-size:clamp(11px,1.3vw,13px);
+    font-weight:600;letter-spacing:.08em;cursor:pointer;
+    transition:opacity .2s,transform .1s;white-space:nowrap;
+  }
+  #nl-submit:hover{opacity:.9;}
+  #nl-submit:active{transform:scale(.97);}
+  .nl-privacy{font-size:clamp(9px,1.1vw,11px);color:rgba(255,255,255,.3);margin-top:1.2em;}
+
+  /* ── THANK YOU PAGE ── */
+  #thankyou-page{
+    display:none;width:100%;min-height:100vh;
+    background:#080820;
+    flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:40px 20px;
+    position:relative;overflow:hidden;
+  }
+  #thankyou-page.show{display:flex;}
+  canvas#ty-stars{position:absolute;inset:0;width:100%;height:100%;}
+  .ty-content{position:relative;z-index:2;max-width:560px;}
+  .ty-ring{
+    width:clamp(70px,12vw,100px);height:clamp(70px,12vw,100px);
+    border-radius:50%;
+    background:linear-gradient(135deg,#4a90f5,#9b5dff);
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 1.5em;
+    font-size:clamp(28px,5vw,44px);
+    animation:popIn .7s cubic-bezier(.175,.885,.32,1.275) forwards;
+    opacity:0;
+  }
+  @keyframes popIn{from{opacity:0;transform:scale(.4);}to{opacity:1;transform:scale(1);}}
+  .ty-logo{font-size:clamp(28px,6vw,56px);font-weight:700;background:linear-gradient(135deg,#4a90f5 0%,#9b5dff 50%,#ff6eb4 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.3em;animation:fadeUp .7s ease .4s both;}
+  .ty-headline{font-size:clamp(18px,3.5vw,34px);font-weight:700;color:white;margin-bottom:.5em;animation:fadeUp .7s ease .5s both;}
+  .ty-sub{font-size:clamp(12px,1.6vw,16px);color:rgba(255,255,255,.55);font-weight:300;line-height:1.8;margin-bottom:2em;animation:fadeUp .7s ease .6s both;}
+  .ty-perks{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:2.5em;animation:fadeUp .7s ease .7s both;}
+  .ty-perk{background:rgba(255,255,255,.06);border:.5px solid rgba(255,255,255,.12);border-radius:50px;padding:8px 18px;font-size:clamp(10px,1.2vw,12px);color:rgba(255,255,255,.7);}
+  .ty-back{padding:13px 32px;background:linear-gradient(135deg,#4a90f5,#9b5dff);border:none;border-radius:50px;color:white;font-family:'Sora',sans-serif;font-size:clamp(11px,1.3vw,13px);font-weight:600;letter-spacing:.08em;cursor:pointer;animation:fadeUp .7s ease .8s both;}
+  .ty-back:hover{opacity:.9;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+  .ty-email-confirm{font-size:clamp(11px,1.3vw,13px);color:#7ec8ff;margin-bottom:2em;animation:fadeUp .7s ease .55s both;}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ══ VIDEO AD ══ -->
+  <div id="universe-ad">
+    <canvas id="stars"></canvas>
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Scene 1 -->
+    <div class="scene active" id="scene1">
+      <div class="globe-container">
+        <svg class="globe" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="globeGrad" cx="35%" cy="35%"><stop offset="0%" stop-color="#1a3a6e"/><stop offset="100%" stop-color="#060d1a"/></radialGradient>
+            <radialGradient id="glowGrad" cx="50%" cy="50%"><stop offset="60%" stop-color="transparent"/><stop offset="100%" stop-color="rgba(74,144,245,.2)"/></radialGradient>
+          </defs>
+          <circle cx="100" cy="100" r="90" fill="url(#globeGrad)" stroke="#2a5aaa" stroke-width=".5"/>
+          <ellipse cx="100" cy="100" rx="90" ry="30" fill="none" stroke="rgba(126,200,255,.2)" stroke-width=".5"/>
+          <ellipse cx="100" cy="100" rx="90" ry="55" fill="none" stroke="rgba(126,200,255,.15)" stroke-width=".5"/>
+          <line x1="10" y1="100" x2="190" y2="100" stroke="rgba(126,200,255,.2)" stroke-width=".5"/>
+          <path d="M100 10 Q85 50 100 100 Q115 150 100 190" fill="none" stroke="rgba(126,200,255,.15)" stroke-width=".5"/>
+          <path d="M100 10 Q60 40 40 100 Q60 160 100 190" fill="none" stroke="rgba(126,200,255,.12)" stroke-width=".5"/>
+          <path d="M100 10 Q140 40 160 100 Q140 160 100 190" fill="none" stroke="rgba(126,200,255,.12)" stroke-width=".5"/>
+          <circle cx="100" cy="100" r="90" fill="url(#glowGrad)"/>
+          <g class="orbit"><circle cx="100" cy="15" r="5" fill="#4a90f5" opacity=".9"/></g>
+          <g class="orbit-2" style="transform-origin:100px 100px"><circle cx="185" cy="100" r="5" fill="#9b5dff" opacity=".9"/></g>
+          <g class="orbit-3" style="transform-origin:100px 100px"><circle cx="58" cy="27" r="4" fill="#ff6eb4" opacity=".9"/></g>
+          <circle cx="75" cy="85" r="3" fill="#4a90f5" opacity=".7"/>
+          <circle cx="120" cy="70" r="3" fill="#9b5dff" opacity=".7"/>
+          <circle cx="90" cy="115" r="3" fill="#7ec8ff" opacity=".7"/>
+          <circle cx="130" cy="105" r="3" fill="#ff6eb4" opacity=".7"/>
+          <line x1="75" y1="85" x2="120" y2="70" stroke="rgba(126,200,255,.35)" stroke-width=".5" class="connection-line"/>
+          <line x1="120" y1="70" x2="90" y2="115" stroke="rgba(126,200,255,.35)" stroke-width=".5" class="connection-line"/>
+          <line x1="90" y1="115" x2="130" y2="105" stroke="rgba(126,200,255,.35)" stroke-width=".5" class="connection-line"/>
+        </svg>
+      </div>
+      <div class="scene-text" style="top:12%;">
+        <div class="tagline">introducing</div>
+        <div class="headline">UniVerse</div>
+        <div class="subline">Where every student finds their world</div>
+      </div>
+    </div>
+
+    <!-- Scene 2 -->
+    <div class="scene" id="scene2">
+      <div class="scene-text" style="top:10%;">
+        <div class="tagline">connect</div>
+        <div class="headline">Students from<br>every corner</div>
+        <div class="subline">Real connections. Real friendships. Real community.</div>
+      </div>
+      <div style="position:absolute;bottom:14%;width:100%;display:flex;justify-content:center;padding:0 8%;gap:8px;flex-wrap:wrap;">
+        <div class="flag-avatar" id="fa1"><div class="avatar-circle" style="background:#1a3a6e;">🇯🇵</div>Keiko, Tokyo</div>
+        <div class="flag-avatar" id="fa2"><div class="avatar-circle" style="background:#2d1a4e;">🇧🇷</div>Lucas, São Paulo</div>
+        <div class="flag-avatar" id="fa3"><div class="avatar-circle" style="background:#1a2e1a;">🇳🇬</div>Amara, Lagos</div>
+        <div class="flag-avatar" id="fa4"><div class="avatar-circle" style="background:#3a1a1a;">🇮🇳</div>Priya, Mumbai</div>
+        <div class="flag-avatar" id="fa5"><div class="avatar-circle" style="background:#1a2a3a;">🇩🇪</div>Felix, Berlin</div>
+        <div class="flag-avatar" id="fa6"><div class="avatar-circle" style="background:#2a2a1a;">🇰🇷</div>Jisu, Seoul</div>
+      </div>
+    </div>
+
+    <!-- Scene 3 -->
+    <div class="scene" id="scene3">
+      <div class="scene-text" style="top:8%;">
+        <div class="tagline">everything you need</div>
+        <div class="headline">Your campus.<br>Your universe.</div>
+        <div class="subline">All in one place</div>
+      </div>
+      <div class="feature-cards">
+        <div class="feat-card" id="fc1"><span class="feat-icon">🗺️</span><span class="feat-label">Find Places</span></div>
+        <div class="feat-card" id="fc2"><span class="feat-icon">🤝</span><span class="feat-label">Seek Help</span></div>
+        <div class="feat-card" id="fc3"><span class="feat-icon">🎉</span><span class="feat-label">Plan Events</span></div>
+        <div class="feat-card" id="fc4"><span class="feat-icon">💬</span><span class="feat-label">Chat &amp; Connect</span></div>
+        <div class="feat-card" id="fc5"><span class="feat-icon">🌍</span><span class="feat-label">Global Peers</span></div>
+      </div>
+    </div>
+
+    <!-- Scene 4 -->
+    <div class="scene" id="scene4">
+      <div class="logo-reveal">UniVerse</div>
+      <div class="logo-sub">Your world. Your students. Your community.</div>
+    </div>
+
+    <div class="scene-dots">
+      <div class="dot active" id="dot0"></div>
+      <div class="dot" id="dot1"></div>
+      <div class="dot" id="dot2"></div>
+      <div class="dot" id="dot3"></div>
+    </div>
+  </div>
+
+  <!-- ══ NEWSLETTER ══ -->
+  <section id="newsletter-section">
+    <div class="nl-eyebrow">be the first to know</div>
+    <h2 class="nl-heading">UniVerse is launching soon.<br>Get early access.</h2>
+    <p class="nl-sub">Join thousands of international students waiting for the app that finally makes campus life feel like home — wherever you are.</p>
+
+    <div id="nl-form">
+      <input type="text" id="nl-name" placeholder="Your name" autocomplete="given-name"/>
+      <input type="email" id="nl-email" placeholder="Your email address" autocomplete="email"/>
+      <button id="nl-submit" onclick="handleSubscribe()">Join the waitlist</button>
+    </div>
+    <p class="nl-privacy">No spam. Unsubscribe anytime. We respect your privacy.</p>
+  </section>
+
+</div><!-- end #app -->
+
+
+<!-- ══ THANK YOU PAGE ══ -->
+<div id="thankyou-page">
+  <canvas id="ty-stars"></canvas>
+  <div class="ty-content">
+    <div class="ty-ring">🚀</div>
+    <div class="ty-logo">UniVerse</div>
+    <h1 class="ty-headline">You're on board!</h1>
+    <p class="ty-email-confirm" id="ty-email-line">We'll reach out to you soon.</p>
+    <p class="ty-sub">Welcome to the community. We're building something special for international students everywhere — and you'll be among the first to experience it.</p>
+    <div class="ty-perks">
+      <span class="ty-perk">✦ Early access</span>
+      <span class="ty-perk">✦ Exclusive updates</span>
+      <span class="ty-perk">✦ Founding member badge</span>
+    </div>
+    <button class="ty-back" onclick="goBack()">← Back to UniVerse</button>
+  </div>
+</div>
+
+<script>
+  /* ── STARS (ad) ── */
+  const ad = document.getElementById('universe-ad');
+  const canvas = document.getElementById('stars');
+  const ctx = canvas.getContext('2d');
+  function resizeCanvas(){canvas.width=ad.offsetWidth;canvas.height=ad.offsetHeight;}
+  resizeCanvas();
+  const stars=Array.from({length:180},()=>({x:Math.random(),y:Math.random(),r:Math.random()*1.4+.3,alpha:Math.random()*.7+.3,speed:Math.random()*.4+.1,phase:Math.random()*Math.PI*2}));
+  let t=0;
+  function drawStars(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);t+=.012;
+    stars.forEach(s=>{const a=s.alpha*(.6+.4*Math.sin(t*s.speed+s.phase));ctx.beginPath();ctx.arc(s.x*canvas.width,s.y*canvas.height,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(180,210,255,${a})`;ctx.fill();});
+    requestAnimationFrame(drawStars);
+  }
+  drawStars();
+  window.addEventListener('resize',resizeCanvas);
+
+  /* ── STARS (thank you) ── */
+  const tyCanvas=document.getElementById('ty-stars');
+  const tyCtx=tyCanvas.getContext('2d');
+  function resizeTy(){tyCanvas.width=window.innerWidth;tyCanvas.height=window.innerHeight;}
+  resizeTy();
+  const tyStars=Array.from({length:200},()=>({x:Math.random(),y:Math.random(),r:Math.random()*1.5+.3,alpha:Math.random()*.8+.2,speed:Math.random()*.3+.1,phase:Math.random()*Math.PI*2}));
+  let tt=0;
+  function drawTyStars(){
+    tyCtx.clearRect(0,0,tyCanvas.width,tyCanvas.height);tt+=.01;
+    tyStars.forEach(s=>{const a=s.alpha*(.5+.5*Math.sin(tt*s.speed+s.phase));tyCtx.beginPath();tyCtx.arc(s.x*tyCanvas.width,s.y*tyCanvas.height,s.r,0,Math.PI*2);tyCtx.fillStyle=`rgba(180,210,255,${a})`;tyCtx.fill();});
+    requestAnimationFrame(drawTyStars);
+  }
+  drawTyStars();
+  window.addEventListener('resize',resizeTy);
+
+  /* ── AD SCENES ── */
+  let currentScene=0;
+  const scenes=[1,2,3,4].map(i=>document.getElementById('scene'+i));
+  const dots=[0,1,2,3].map(i=>document.getElementById('dot'+i));
+  const bar=document.getElementById('progressBar');
+  const SCENE_DURATION=4200;
+  let autoTimer=null;
+
+  function goToScene(n){
+    scenes[currentScene].classList.remove('active');
+    dots[currentScene].classList.remove('active');
+    currentScene=n%4;
+    scenes[currentScene].classList.add('active');
+    dots[currentScene].classList.add('active');
+    if(currentScene===1){['fa1','fa2','fa3','fa4','fa5','fa6'].forEach((id,i)=>{const el=document.getElementById(id);if(el){el.classList.remove('show');setTimeout(()=>el.classList.add('show'),300+i*150);}});}
+    if(currentScene===2){['fc1','fc2','fc3','fc4','fc5'].forEach((id,i)=>{const el=document.getElementById(id);if(el){el.classList.remove('show');setTimeout(()=>el.classList.add('show'),300+i*120);}});}
+    bar.style.transition='none';bar.style.width='0%';
+    requestAnimationFrame(()=>{bar.style.transition=`width ${SCENE_DURATION}ms linear`;bar.style.width='100%';});
+  }
+
+  function startAuto(){clearInterval(autoTimer);autoTimer=setInterval(()=>goToScene(currentScene+1),SCENE_DURATION);}
+  ad.addEventListener('click',e=>{clearInterval(autoTimer);goToScene(currentScene+1);startAuto();});
+  goToScene(0);startAuto();
+
+  /* ── NEWSLETTER ── */
+  function handleSubscribe(){
+    const name=document.getElementById('nl-name').value.trim();
+    const email=document.getElementById('nl-email').value.trim();
+    if(!name){alert('Please enter your name.');return;}
+    if(!email||!email.includes('@')){alert('Please enter a valid email address.');return;}
+    document.getElementById('ty-email-line').textContent=`Confirmation sent to ${email} — see you soon, ${name}!`;
+    document.getElementById('app').style.display='none';
+    document.getElementById('thankyou-page').classList.add('show');
+    window.scrollTo(0,0);
+  }
+
+  function goBack(){
+    document.getElementById('thankyou-page').classList.remove('show');
+    document.getElementById('app').style.display='flex';
+    document.getElementById('nl-name').value='';
+    document.getElementById('nl-email').value='';
+    window.scrollTo(0,0);
+  }
+
+  document.getElementById('nl-email').addEventListener('keydown',e=>{if(e.key==='Enter')handleSubscribe();});
+</script>
+</body>
+</html>
