@@ -1,337 +1,1040 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>UniVerse — Where Every Student Finds Their World</title>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UniVerse — Your World, Wherever You Study</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html,body{width:100%;min-height:100%;background:#080820;font-family:'Sora',sans-serif;color:white;}
-
-  /* ── PAGE WRAPPER ── */
-  #app{width:100%;min-height:100vh;display:flex;flex-direction:column;align-items:center;background:#080820;}
-
-  /* ── AD CONTAINER ── */
-  #universe-ad{
-    width:100%;max-width:900px;aspect-ratio:16/9;
-    background:#080820;position:relative;overflow:hidden;cursor:pointer;
-    border-radius:0 0 16px 16px;
+  :root {
+    --ink: #0d0d1a;
+    --paper: #f5f3ee;
+    --accent: #ff5533;
+    --accent2: #3366ff;
+    --accent3: #ffcc00;
+    --soft: #e8e4db;
+    --muted: #8a8778;
+    --radius: 2px;
   }
-  canvas#stars{position:absolute;inset:0;width:100%;height:100%;}
 
-  .scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:opacity .8s ease;pointer-events:none;}
-  .scene.active{opacity:1;pointer-events:auto;}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  .globe-container{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
-  svg.globe{width:min(55%,320px);animation:floatGlobe 6s ease-in-out infinite;}
-  @keyframes floatGlobe{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-12px) rotate(2deg);}}
-  .orbit{transform-origin:center;animation:orbit 8s linear infinite;}
-  .orbit-2{animation-duration:12s;animation-direction:reverse;}
-  .orbit-3{animation-duration:5s;}
-  @keyframes orbit{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+  html { scroll-behavior: smooth; }
 
-  .scene-text{position:absolute;text-align:center;color:white;z-index:10;padding:0 5%;}
-  .tagline{font-size:clamp(9px,2vw,18px);font-weight:300;letter-spacing:.25em;color:#7ec8ff;text-transform:uppercase;margin-bottom:.5em;opacity:0;transform:translateY(20px);transition:all .7s ease .3s;}
-  .headline{font-size:clamp(18px,5vw,52px);font-weight:700;line-height:1.1;background:linear-gradient(135deg,#fff 0%,#a8d4ff 50%,#c9a0ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;opacity:0;transform:translateY(20px);transition:all .7s ease .5s;margin-bottom:.4em;}
-  .subline{font-size:clamp(9px,1.6vw,16px);font-weight:300;color:rgba(255,255,255,.6);letter-spacing:.05em;opacity:0;transform:translateY(20px);transition:all .7s ease .7s;margin-bottom:1.2em;}
-  .scene.active .tagline,.scene.active .headline,.scene.active .subline,.scene.active .cta-btn{opacity:1;transform:translateY(0);}
-
-  .cta-btn{display:inline-block;padding:.55em 1.8em;background:linear-gradient(135deg,#4a90f5,#9b5dff);border-radius:50px;font-size:clamp(9px,1.4vw,13px);font-weight:600;color:white;letter-spacing:.1em;text-transform:uppercase;border:none;cursor:pointer;opacity:0;transform:translateY(20px);transition:all .7s ease .9s;}
-
-  .feature-cards{display:flex;gap:clamp(5px,1.2vw,12px);padding:0 5%;width:100%;justify-content:center;position:absolute;bottom:12%;}
-  .feat-card{background:rgba(255,255,255,.05);border:.5px solid rgba(255,255,255,.12);border-radius:10px;padding:clamp(5px,1vw,10px) clamp(7px,1.3vw,14px);text-align:center;opacity:0;transform:translateY(30px);transition:opacity .5s ease,transform .5s ease;flex:1;max-width:120px;}
-  .feat-card.show{opacity:1;transform:translateY(0);}
-  .feat-icon{font-size:clamp(14px,2.2vw,22px);margin-bottom:3px;display:block;}
-  .feat-label{font-size:clamp(7px,1.1vw,10px);color:rgba(255,255,255,.7);letter-spacing:.04em;}
-
-  .logo-reveal{font-size:clamp(30px,8vw,80px);font-weight:700;background:linear-gradient(135deg,#4a90f5 0%,#9b5dff 50%,#ff6eb4 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;opacity:0;transform:scale(.7);transition:all .9s cubic-bezier(.175,.885,.32,1.275) .2s;}
-  .scene.active .logo-reveal{opacity:1;transform:scale(1);}
-  .logo-sub{font-size:clamp(8px,1.4vw,13px);font-weight:300;letter-spacing:.4em;color:rgba(255,255,255,.5);text-transform:uppercase;margin-top:.4em;opacity:0;transition:opacity .7s ease .8s;}
-  .scene.active .logo-sub{opacity:1;}
-
-  .flag-avatar{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.07);border:.5px solid rgba(255,255,255,.15);border-radius:50px;padding:5px 12px 5px 6px;font-size:clamp(8px,1.2vw,11px);color:rgba(255,255,255,.8);opacity:0;transform:translateY(10px);transition:opacity .4s ease,transform .4s ease;white-space:nowrap;}
-  .flag-avatar.show{opacity:1;transform:translateY(0);}
-  .avatar-circle{width:clamp(20px,2.8vw,26px);height:clamp(20px,2.8vw,26px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(9px,1.4vw,13px);flex-shrink:0;}
-
-  .connection-line{stroke:rgba(126,200,255,.3);stroke-width:.5;animation:pulse-line 2s ease-in-out infinite;}
-  @keyframes pulse-line{0%,100%{opacity:.15;}50%{opacity:.5;}}
-
-  .progress-bar{position:absolute;bottom:0;left:0;height:2px;background:linear-gradient(90deg,#4a90f5,#9b5dff);width:0%;z-index:20;transition:width linear;}
-  .scene-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:20;}
-  .dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.25);transition:background .3s,transform .3s;}
-  .dot.active{background:#7ec8ff;transform:scale(1.4);}
-
-  /* ── NEWSLETTER SECTION ── */
-  #newsletter-section{
-    width:100%;max-width:900px;
-    background:linear-gradient(180deg,#0d0d2e 0%,#080820 100%);
-    padding:clamp(30px,5vw,60px) clamp(20px,5vw,60px);
-    text-align:center;
-    border-top:.5px solid rgba(126,200,255,.15);
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    overflow-x: hidden;
   }
-  .nl-eyebrow{font-size:clamp(9px,1.3vw,12px);font-weight:300;letter-spacing:.3em;color:#7ec8ff;text-transform:uppercase;margin-bottom:.8em;}
-  .nl-heading{font-size:clamp(20px,4vw,40px);font-weight:700;background:linear-gradient(135deg,#fff 0%,#a8d4ff 60%,#c9a0ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.6em;line-height:1.15;}
-  .nl-sub{font-size:clamp(11px,1.5vw,15px);color:rgba(255,255,255,.5);font-weight:300;margin-bottom:2em;line-height:1.7;max-width:520px;margin-left:auto;margin-right:auto;}
 
-  #nl-form{display:flex;gap:10px;max-width:480px;margin:0 auto;flex-wrap:wrap;justify-content:center;}
-  #nl-name,#nl-email{
-    flex:1;min-width:160px;padding:13px 18px;
-    background:rgba(255,255,255,.06);
-    border:.5px solid rgba(255,255,255,.2);
-    border-radius:50px;color:white;
-    font-family:'Sora',sans-serif;font-size:clamp(11px,1.3vw,13px);
-    outline:none;transition:border-color .3s;
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 4rem;
+    background: var(--paper);
+    border-bottom: 1.5px solid var(--ink);
+    animation: slideDown .6s ease both;
   }
-  #nl-name::placeholder,#nl-email::placeholder{color:rgba(255,255,255,.35);}
-  #nl-name:focus,#nl-email:focus{border-color:rgba(126,200,255,.6);}
-  #nl-submit{
-    padding:13px 28px;background:linear-gradient(135deg,#4a90f5,#9b5dff);
-    border:none;border-radius:50px;color:white;
-    font-family:'Sora',sans-serif;font-size:clamp(11px,1.3vw,13px);
-    font-weight:600;letter-spacing:.08em;cursor:pointer;
-    transition:opacity .2s,transform .1s;white-space:nowrap;
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1.5rem;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    display: flex; align-items: center; gap: .4rem;
   }
-  #nl-submit:hover{opacity:.9;}
-  #nl-submit:active{transform:scale(.97);}
-  .nl-privacy{font-size:clamp(9px,1.1vw,11px);color:rgba(255,255,255,.3);margin-top:1.2em;}
+  .logo span { color: var(--accent); }
+
+  .nav-cta {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: .85rem;
+    letter-spacing: .06em; text-transform: uppercase;
+    text-decoration: none;
+    padding: .6rem 1.4rem;
+    background: var(--ink);
+    color: var(--paper);
+    border: 1.5px solid var(--ink);
+    transition: background .2s, color .2s;
+  }
+  .nav-cta:hover { background: var(--accent); border-color: var(--accent); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    padding: 10rem 4rem 6rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    border-bottom: 1.5px solid var(--ink);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: .18;
+    pointer-events: none;
+  }
+  .orb1 { width: 500px; height: 500px; background: var(--accent2); top: -100px; right: -100px; }
+  .orb2 { width: 350px; height: 350px; background: var(--accent); bottom: 0; left: 20%; }
+
+  .hero-label {
+    font-family: 'Syne', sans-serif;
+    font-size: .78rem; font-weight: 700;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: .7rem;
+    animation: fadeUp .8s .1s ease both;
+  }
+  .hero-label::before {
+    content: '';
+    display: inline-block; width: 2rem; height: 1.5px;
+    background: var(--accent);
+  }
+
+  .hero-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(3.2rem, 5.5vw, 5.5rem);
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    margin-bottom: 2rem;
+    animation: fadeUp .8s .2s ease both;
+  }
+  .hero-title em {
+    font-style: normal;
+    color: var(--accent);
+  }
+  .hero-title .underline-word {
+    position: relative; display: inline-block;
+  }
+  .hero-title .underline-word::after {
+    content: '';
+    position: absolute; left: 0; bottom: 4px; right: 0; height: 4px;
+    background: var(--accent3);
+    z-index: -1;
+  }
+
+  .hero-sub {
+    font-size: 1.1rem; font-weight: 300; line-height: 1.75;
+    color: #3a3a4a; max-width: 480px;
+    margin-bottom: 2.5rem;
+    animation: fadeUp .8s .3s ease both;
+  }
+
+  .hero-actions {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    animation: fadeUp .8s .4s ease both;
+  }
+
+  .btn-primary {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: .9rem;
+    letter-spacing: .04em;
+    padding: .9rem 2.2rem;
+    background: var(--accent);
+    color: #fff;
+    border: 2px solid var(--accent);
+    text-decoration: none;
+    transition: background .2s, transform .15s;
+    display: inline-flex; align-items: center; gap: .5rem;
+  }
+  .btn-primary:hover { background: #e04020; transform: translateY(-2px); }
+
+  .btn-ghost {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: .9rem;
+    letter-spacing: .04em;
+    padding: .9rem 2.2rem;
+    background: transparent;
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    text-decoration: none;
+    transition: background .2s, color .2s;
+  }
+  .btn-ghost:hover { background: var(--ink); color: var(--paper); }
+
+  /* Hero visual */
+  .hero-visual {
+    position: relative;
+    animation: fadeUp .8s .3s ease both;
+  }
+
+  .hero-card-stack {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1.05;
+    max-width: 440px;
+    margin-left: auto;
+  }
+
+  .hcard {
+    position: absolute;
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    padding: 1.4rem 1.6rem;
+    width: 76%;
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+  .hcard-label {
+    font-family: 'Syne', sans-serif;
+    font-size: .7rem; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: .5rem;
+  }
+  .hcard-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem; font-weight: 800;
+    letter-spacing: -.02em;
+  }
+  .hcard-1 { top: 5%; left: 0; background: var(--ink); color: var(--paper); animation: float 4s ease-in-out infinite; }
+  .hcard-1 .hcard-label { color: #8888aa; }
+  .hcard-2 { top: 38%; right: 0; animation: float 4s 1.3s ease-in-out infinite; }
+  .hcard-3 { bottom: 0; left: 12%; background: var(--accent3); animation: float 4s 2.1s ease-in-out infinite; }
+  .hcard-3 .hcard-label { color: #665500; }
+
+  .hcard-avatars {
+    display: flex; gap: .3rem; margin-top: .6rem;
+  }
+  .avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .7rem; font-weight: 700;
+  }
+
+  .hcard-pill {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: #e8ffe8; border: 1.5px solid #22aa44;
+    color: #166633; border-radius: 100px;
+    padding: .25rem .7rem; font-size: .75rem; font-weight: 500;
+    margin-top: .5rem;
+  }
+  .hcard-pill::before { content: '●'; font-size: .5rem; color: #22aa44; }
+
+  /* ── TICKER ── */
+  .ticker {
+    overflow: hidden;
+    border-bottom: 1.5px solid var(--ink);
+    background: var(--accent);
+    padding: .7rem 0;
+  }
+  .ticker-track {
+    display: flex; gap: 4rem;
+    white-space: nowrap;
+    animation: ticker 22s linear infinite;
+  }
+  .ticker-item {
+    font-family: 'Syne', sans-serif;
+    font-size: .8rem; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: #fff;
+    display: flex; align-items: center; gap: 4rem;
+  }
+  .ticker-item::after {
+    content: '★'; font-size: .6rem;
+  }
+
+  /* ── SECTION SHARED ── */
+  section { border-bottom: 1.5px solid var(--ink); }
+
+  .section-tag {
+    font-family: 'Syne', sans-serif;
+    font-size: .72rem; font-weight: 700;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted);
+    display: flex; align-items: center; gap: .6rem;
+    margin-bottom: 1rem;
+  }
+  .section-tag span { color: var(--accent); }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 800; letter-spacing: -.04em;
+    line-height: 1.08;
+    margin-bottom: 1.2rem;
+  }
+
+  /* ── FEATURES ── */
+  .features { padding: 6rem 4rem; }
+
+  .features-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    margin-bottom: 5rem;
+    align-items: end;
+  }
+
+  .features-intro {
+    font-size: 1.05rem; font-weight: 300; line-height: 1.8;
+    color: #3a3a4a; max-width: 400px;
+    align-self: center;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+
+  .feature-card {
+    border: 1.5px solid var(--ink);
+    margin: -1px 0 0 -1px;
+    padding: 2.2rem 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: background .25s;
+    cursor: default;
+  }
+  .feature-card:hover { background: var(--soft); }
+  .feature-card:hover .feature-icon { transform: scale(1.15) rotate(-5deg); }
+
+  .feature-number {
+    font-family: 'Syne', sans-serif;
+    font-size: .7rem; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 1.5rem;
+  }
+
+  .feature-icon {
+    font-size: 2.4rem; margin-bottom: 1.2rem;
+    display: block;
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  .feature-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.15rem; font-weight: 800;
+    letter-spacing: -.02em;
+    margin-bottom: .7rem;
+  }
+
+  .feature-desc {
+    font-size: .9rem; font-weight: 300; line-height: 1.7;
+    color: #444;
+  }
+
+  .feature-tag {
+    margin-top: 1.2rem;
+    display: inline-block;
+    font-family: 'Syne', sans-serif;
+    font-size: .68rem; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase;
+    padding: .3rem .7rem;
+    border: 1.5px solid currentColor;
+  }
+
+  /* ── STATS ── */
+  .stats {
+    padding: 5rem 4rem;
+    background: var(--ink);
+    color: var(--paper);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .stat-item {
+    padding: 2rem;
+    border-right: 1.5px solid #ffffff22;
+    text-align: center;
+  }
+  .stat-item:last-child { border-right: none; }
+
+  .stat-number {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.5rem, 4vw, 3.8rem);
+    font-weight: 800;
+    letter-spacing: -.05em;
+    line-height: 1;
+    color: var(--accent3);
+    display: block; margin-bottom: .4rem;
+  }
+
+  .stat-label {
+    font-size: .85rem; font-weight: 300;
+    color: #aaa;
+    letter-spacing: .02em;
+  }
+
+  /* ── HOW ── */
+  .how { padding: 6rem 4rem; }
+
+  .how-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3rem;
+    margin-top: 4rem;
+  }
+
+  .step {
+    display: flex; gap: 1.5rem; align-items: flex-start;
+  }
+
+  .step-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 3rem; font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+    flex-shrink: 0;
+    opacity: .25;
+  }
+
+  .step-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem; font-weight: 800;
+    letter-spacing: -.02em;
+    margin-bottom: .5rem;
+  }
+
+  .step-desc {
+    font-size: .9rem; font-weight: 300; line-height: 1.7; color: #444;
+  }
+
+  /* ── TESTIMONIAL ── */
+  .testimonial {
+    padding: 6rem 4rem;
+    background: var(--accent2);
+    color: var(--paper);
+  }
+
+  .testimonial-inner {
+    max-width: 800px; margin: 0 auto; text-align: center;
+  }
+
+  .testimonial-quote {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.5rem, 2.8vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: -.03em;
+    margin-bottom: 2rem;
+    opacity: .95;
+  }
+
+  .testimonial-author {
+    display: flex; align-items: center; justify-content: center; gap: .8rem;
+    font-size: .9rem; font-weight: 300;
+    opacity: .7;
+  }
+
+  .t-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(255,255,255,.25);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: .85rem;
+  }
+
+  /* ── SUBSCRIBE ── */
+  .subscribe {
+    padding: 7rem 4rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+  }
+
+  .subscribe-left .section-title { font-size: clamp(2.2rem, 4vw, 3.5rem); }
+
+  .subscribe-desc {
+    font-size: 1rem; font-weight: 300; line-height: 1.8;
+    color: #3a3a4a; margin-top: 1rem;
+  }
+
+  .subscribe-form {
+    background: var(--soft);
+    border: 1.5px solid var(--ink);
+    padding: 2.5rem;
+    box-shadow: 6px 6px 0 var(--ink);
+  }
+
+  .form-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.2rem; font-weight: 800;
+    letter-spacing: -.02em; margin-bottom: 1.8rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.2rem;
+  }
+
+  .form-label {
+    display: block;
+    font-family: 'Syne', sans-serif;
+    font-size: .72rem; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase;
+    margin-bottom: .45rem; color: var(--muted);
+  }
+
+  .form-input {
+    width: 100%;
+    padding: .75rem 1rem;
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .95rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color .2s;
+    appearance: none;
+  }
+  .form-input:focus { border-color: var(--accent); }
+
+  .form-select { cursor: pointer; }
+
+  .form-check-group {
+    display: flex; flex-direction: column; gap: .6rem;
+    margin-top: .3rem;
+  }
+
+  .form-check {
+    display: flex; align-items: center; gap: .6rem;
+    cursor: pointer;
+  }
+
+  .form-check input[type="checkbox"] {
+    width: 16px; height: 16px;
+    border: 1.5px solid var(--ink);
+    appearance: none; background: var(--paper);
+    cursor: pointer; flex-shrink: 0;
+    position: relative;
+    transition: background .15s;
+  }
+  .form-check input[type="checkbox"]:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .form-check input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff; font-size: .7rem; font-weight: 700;
+  }
+
+  .form-check-label {
+    font-size: .88rem; font-weight: 300;
+  }
+
+  .btn-submit {
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: var(--accent);
+    color: #fff;
+    border: 2px solid var(--accent);
+    font-family: 'Syne', sans-serif;
+    font-size: .9rem; font-weight: 700;
+    letter-spacing: .05em; text-transform: uppercase;
+    cursor: pointer;
+    transition: background .2s, transform .15s;
+    display: flex; align-items: center; justify-content: center; gap: .5rem;
+  }
+  .btn-submit:hover { background: #e04020; transform: translateY(-2px); }
+
+  .form-privacy {
+    margin-top: 1rem;
+    font-size: .78rem; font-weight: 300;
+    color: var(--muted); text-align: center;
+    line-height: 1.5;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 3rem 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .footer-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1.3rem;
+    letter-spacing: -.03em;
+  }
+  .footer-logo span { color: var(--accent); }
+
+  .footer-copy {
+    font-size: .8rem; font-weight: 300; color: #666;
+  }
+
+  .footer-links {
+    display: flex; gap: 1.5rem;
+  }
+  .footer-links a {
+    font-family: 'Syne', sans-serif;
+    font-size: .75rem; font-weight: 600;
+    letter-spacing: .08em; text-transform: uppercase;
+    color: #888; text-decoration: none;
+    transition: color .2s;
+  }
+  .footer-links a:hover { color: var(--accent); }
 
   /* ── THANK YOU PAGE ── */
-  #thankyou-page{
-    display:none;width:100%;min-height:100vh;
-    background:#080820;
-    flex-direction:column;align-items:center;justify-content:center;
-    text-align:center;padding:40px 20px;
-    position:relative;overflow:hidden;
+  .thankyou-page {
+    display: none;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    padding: 4rem;
+    background: var(--paper);
   }
-  #thankyou-page.show{display:flex;}
-  canvas#ty-stars{position:absolute;inset:0;width:100%;height:100%;}
-  .ty-content{position:relative;z-index:2;max-width:560px;}
-  .ty-ring{
-    width:clamp(70px,12vw,100px);height:clamp(70px,12vw,100px);
-    border-radius:50%;
-    background:linear-gradient(135deg,#4a90f5,#9b5dff);
-    display:flex;align-items:center;justify-content:center;
-    margin:0 auto 1.5em;
-    font-size:clamp(28px,5vw,44px);
-    animation:popIn .7s cubic-bezier(.175,.885,.32,1.275) forwards;
-    opacity:0;
+
+  .thankyou-page.active { display: flex; }
+
+  .main-site { display: block; }
+  .main-site.hidden { display: none; }
+
+  .ty-icon {
+    font-size: 5rem; margin-bottom: 2rem;
+    animation: bounceIn .6s cubic-bezier(.34,1.56,.64,1) both;
   }
-  @keyframes popIn{from{opacity:0;transform:scale(.4);}to{opacity:1;transform:scale(1);}}
-  .ty-logo{font-size:clamp(28px,6vw,56px);font-weight:700;background:linear-gradient(135deg,#4a90f5 0%,#9b5dff 50%,#ff6eb4 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.3em;animation:fadeUp .7s ease .4s both;}
-  .ty-headline{font-size:clamp(18px,3.5vw,34px);font-weight:700;color:white;margin-bottom:.5em;animation:fadeUp .7s ease .5s both;}
-  .ty-sub{font-size:clamp(12px,1.6vw,16px);color:rgba(255,255,255,.55);font-weight:300;line-height:1.8;margin-bottom:2em;animation:fadeUp .7s ease .6s both;}
-  .ty-perks{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:2.5em;animation:fadeUp .7s ease .7s both;}
-  .ty-perk{background:rgba(255,255,255,.06);border:.5px solid rgba(255,255,255,.12);border-radius:50px;padding:8px 18px;font-size:clamp(10px,1.2vw,12px);color:rgba(255,255,255,.7);}
-  .ty-back{padding:13px 32px;background:linear-gradient(135deg,#4a90f5,#9b5dff);border:none;border-radius:50px;color:white;font-family:'Sora',sans-serif;font-size:clamp(11px,1.3vw,13px);font-weight:600;letter-spacing:.08em;cursor:pointer;animation:fadeUp .7s ease .8s both;}
-  .ty-back:hover{opacity:.9;}
-  @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-  .ty-email-confirm{font-size:clamp(11px,1.3vw,13px);color:#7ec8ff;margin-bottom:2em;animation:fadeUp .7s ease .55s both;}
+
+  .ty-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 800; letter-spacing: -.05em;
+    line-height: 1.05; margin-bottom: 1.2rem;
+    animation: fadeUp .6s .15s ease both;
+  }
+  .ty-title em { font-style: normal; color: var(--accent); }
+
+  .ty-sub {
+    font-size: 1.1rem; font-weight: 300; line-height: 1.8;
+    color: #444; max-width: 500px; margin: 0 auto 2.5rem;
+    animation: fadeUp .6s .25s ease both;
+  }
+
+  .ty-back {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: .85rem;
+    letter-spacing: .06em; text-transform: uppercase;
+    text-decoration: none;
+    padding: .8rem 2rem;
+    border: 2px solid var(--ink);
+    color: var(--ink);
+    cursor: pointer;
+    background: none;
+    transition: background .2s, color .2s;
+    animation: fadeUp .6s .35s ease both;
+  }
+  .ty-back:hover { background: var(--ink); color: var(--paper); }
+
+  .ty-confetti {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none; z-index: 0;
+    overflow: hidden;
+  }
+  .confetti-dot {
+    position: absolute;
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    animation: confettiFall linear forwards;
+  }
+
+  /* ── KEYFRAMES ── */
+  @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes fadeUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @keyframes bounceIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @keyframes confettiFall {
+    from { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 1rem 1.5rem; }
+    .hero { grid-template-columns: 1fr; padding: 8rem 1.5rem 4rem; }
+    .hero-visual { display: none; }
+    .features { padding: 4rem 1.5rem; }
+    .features-header { grid-template-columns: 1fr; gap: 1rem; }
+    .features-grid { grid-template-columns: 1fr 1fr; }
+    .stats { grid-template-columns: 1fr 1fr; padding: 3rem 1.5rem; }
+    .stat-item { border-right: none; border-bottom: 1.5px solid #ffffff22; }
+    .how { padding: 4rem 1.5rem; }
+    .how-steps { grid-template-columns: 1fr; gap: 2rem; }
+    .testimonial { padding: 4rem 1.5rem; }
+    .subscribe { grid-template-columns: 1fr; padding: 4rem 1.5rem; gap: 2.5rem; }
+    footer { padding: 2rem 1.5rem; flex-direction: column; text-align: center; }
+    .footer-links { justify-content: center; }
+  }
+
+  @media (max-width: 580px) {
+    .features-grid { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
 
-<div id="app">
+<!-- ── MAIN SITE ── -->
+<div class="main-site" id="mainSite">
 
-  <!-- ══ VIDEO AD ══ -->
-  <div id="universe-ad">
-    <canvas id="stars"></canvas>
-    <div class="progress-bar" id="progressBar"></div>
+  <!-- NAV -->
+  <nav>
+    <div class="logo">Uni<span>Verse</span></div>
+    <a href="#subscribe" class="nav-cta">Get Early Access</a>
+  </nav>
 
-    <!-- Scene 1 -->
-    <div class="scene active" id="scene1">
-      <div class="globe-container">
-        <svg class="globe" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <radialGradient id="globeGrad" cx="35%" cy="35%"><stop offset="0%" stop-color="#1a3a6e"/><stop offset="100%" stop-color="#060d1a"/></radialGradient>
-            <radialGradient id="glowGrad" cx="50%" cy="50%"><stop offset="60%" stop-color="transparent"/><stop offset="100%" stop-color="rgba(74,144,245,.2)"/></radialGradient>
-          </defs>
-          <circle cx="100" cy="100" r="90" fill="url(#globeGrad)" stroke="#2a5aaa" stroke-width=".5"/>
-          <ellipse cx="100" cy="100" rx="90" ry="30" fill="none" stroke="rgba(126,200,255,.2)" stroke-width=".5"/>
-          <ellipse cx="100" cy="100" rx="90" ry="55" fill="none" stroke="rgba(126,200,255,.15)" stroke-width=".5"/>
-          <line x1="10" y1="100" x2="190" y2="100" stroke="rgba(126,200,255,.2)" stroke-width=".5"/>
-          <path d="M100 10 Q85 50 100 100 Q115 150 100 190" fill="none" stroke="rgba(126,200,255,.15)" stroke-width=".5"/>
-          <path d="M100 10 Q60 40 40 100 Q60 160 100 190" fill="none" stroke="rgba(126,200,255,.12)" stroke-width=".5"/>
-          <path d="M100 10 Q140 40 160 100 Q140 160 100 190" fill="none" stroke="rgba(126,200,255,.12)" stroke-width=".5"/>
-          <circle cx="100" cy="100" r="90" fill="url(#glowGrad)"/>
-          <g class="orbit"><circle cx="100" cy="15" r="5" fill="#4a90f5" opacity=".9"/></g>
-          <g class="orbit-2" style="transform-origin:100px 100px"><circle cx="185" cy="100" r="5" fill="#9b5dff" opacity=".9"/></g>
-          <g class="orbit-3" style="transform-origin:100px 100px"><circle cx="58" cy="27" r="4" fill="#ff6eb4" opacity=".9"/></g>
-          <circle cx="75" cy="85" r="3" fill="#4a90f5" opacity=".7"/>
-          <circle cx="120" cy="70" r="3" fill="#9b5dff" opacity=".7"/>
-          <circle cx="90" cy="115" r="3" fill="#7ec8ff" opacity=".7"/>
-          <circle cx="130" cy="105" r="3" fill="#ff6eb4" opacity=".7"/>
-          <line x1="75" y1="85" x2="120" y2="70" stroke="rgba(126,200,255,.35)" stroke-width=".5" class="connection-line"/>
-          <line x1="120" y1="70" x2="90" y2="115" stroke="rgba(126,200,255,.35)" stroke-width=".5" class="connection-line"/>
-          <line x1="90" y1="115" x2="130" y2="105" stroke="rgba(126,200,255,.35)" stroke-width=".5" class="connection-line"/>
-        </svg>
-      </div>
-      <div class="scene-text" style="top:12%;">
-        <div class="tagline">introducing</div>
-        <div class="headline">UniVerse</div>
-        <div class="subline">Where every student finds their world</div>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg-orb orb1"></div>
+    <div class="hero-bg-orb orb2"></div>
+
+    <div class="hero-content">
+      <div class="hero-label">For international students, everywhere</div>
+      <h1 class="hero-title">
+        Your <em>world</em>,<br>
+        wherever you <span class="underline-word">study</span>.
+      </h1>
+      <p class="hero-sub">
+        Moving abroad to study is the adventure of a lifetime — but it shouldn't feel lonely. UniVerse connects you with students who get it, because they're living it too.
+      </p>
+      <div class="hero-actions">
+        <a href="#subscribe" class="btn-primary">Join the Waitlist ↗</a>
+        <a href="#features" class="btn-ghost">Explore Features</a>
       </div>
     </div>
 
-    <!-- Scene 2 -->
-    <div class="scene" id="scene2">
-      <div class="scene-text" style="top:10%;">
-        <div class="tagline">connect</div>
-        <div class="headline">Students from<br>every corner</div>
-        <div class="subline">Real connections. Real friendships. Real community.</div>
-      </div>
-      <div style="position:absolute;bottom:14%;width:100%;display:flex;justify-content:center;padding:0 8%;gap:8px;flex-wrap:wrap;">
-        <div class="flag-avatar" id="fa1"><div class="avatar-circle" style="background:#1a3a6e;">🇯🇵</div>Keiko, Tokyo</div>
-        <div class="flag-avatar" id="fa2"><div class="avatar-circle" style="background:#2d1a4e;">🇧🇷</div>Lucas, São Paulo</div>
-        <div class="flag-avatar" id="fa3"><div class="avatar-circle" style="background:#1a2e1a;">🇳🇬</div>Amara, Lagos</div>
-        <div class="flag-avatar" id="fa4"><div class="avatar-circle" style="background:#3a1a1a;">🇮🇳</div>Priya, Mumbai</div>
-        <div class="flag-avatar" id="fa5"><div class="avatar-circle" style="background:#1a2a3a;">🇩🇪</div>Felix, Berlin</div>
-        <div class="flag-avatar" id="fa6"><div class="avatar-circle" style="background:#2a2a1a;">🇰🇷</div>Jisu, Seoul</div>
-      </div>
-    </div>
-
-    <!-- Scene 3 -->
-    <div class="scene" id="scene3">
-      <div class="scene-text" style="top:8%;">
-        <div class="tagline">everything you need</div>
-        <div class="headline">Your campus.<br>Your universe.</div>
-        <div class="subline">All in one place</div>
-      </div>
-      <div class="feature-cards">
-        <div class="feat-card" id="fc1"><span class="feat-icon">🗺️</span><span class="feat-label">Find Places</span></div>
-        <div class="feat-card" id="fc2"><span class="feat-icon">🤝</span><span class="feat-label">Seek Help</span></div>
-        <div class="feat-card" id="fc3"><span class="feat-icon">🎉</span><span class="feat-label">Plan Events</span></div>
-        <div class="feat-card" id="fc4"><span class="feat-icon">💬</span><span class="feat-label">Chat &amp; Connect</span></div>
-        <div class="feat-card" id="fc5"><span class="feat-icon">🌍</span><span class="feat-label">Global Peers</span></div>
+    <div class="hero-visual">
+      <div class="hero-card-stack">
+        <div class="hcard hcard-1">
+          <div class="hcard-label">Students nearby</div>
+          <div class="hcard-value">2,400+</div>
+          <div class="hcard-avatars">
+            <div class="avatar" style="color:#fff">A</div>
+            <div class="avatar" style="color:#fff">L</div>
+            <div class="avatar" style="color:#fff">M</div>
+            <div class="avatar" style="color:#fff">+8</div>
+          </div>
+        </div>
+        <div class="hcard hcard-2">
+          <div class="hcard-label">Weekend event</div>
+          <div class="hcard-value">City Tour 🗺️</div>
+          <div class="hcard-pill">12 going</div>
+        </div>
+        <div class="hcard hcard-3">
+          <div class="hcard-label">Top rated spot</div>
+          <div class="hcard-value">Le Burger ⭐ 4.9</div>
+          <div class="hcard-pill" style="background:#fff4; border-color:#665500; color:#665500;">Picked by students</div>
+        </div>
       </div>
     </div>
+  </section>
 
-    <!-- Scene 4 -->
-    <div class="scene" id="scene4">
-      <div class="logo-reveal">UniVerse</div>
-      <div class="logo-sub">Your world. Your students. Your community.</div>
-    </div>
-
-    <div class="scene-dots">
-      <div class="dot active" id="dot0"></div>
-      <div class="dot" id="dot1"></div>
-      <div class="dot" id="dot2"></div>
-      <div class="dot" id="dot3"></div>
+  <!-- TICKER -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span class="ticker-item">Connect with your people</span>
+      <span class="ticker-item">Plan adventures together</span>
+      <span class="ticker-item">Navigate a new city</span>
+      <span class="ticker-item">Find your community</span>
+      <span class="ticker-item">Speak every language</span>
+      <span class="ticker-item">Connect with your people</span>
+      <span class="ticker-item">Plan adventures together</span>
+      <span class="ticker-item">Navigate a new city</span>
+      <span class="ticker-item">Find your community</span>
+      <span class="ticker-item">Speak every language</span>
     </div>
   </div>
 
-  <!-- ══ NEWSLETTER ══ -->
-  <section id="newsletter-section">
-    <div class="nl-eyebrow">be the first to know</div>
-    <h2 class="nl-heading">UniVerse is launching soon.<br>Get early access.</h2>
-    <p class="nl-sub">Join thousands of international students waiting for the app that finally makes campus life feel like home — wherever you are.</p>
-
-    <div id="nl-form">
-      <input type="text" id="nl-name" placeholder="Your name" autocomplete="given-name"/>
-      <input type="email" id="nl-email" placeholder="Your email address" autocomplete="email"/>
-      <button id="nl-submit" onclick="handleSubscribe()">Join the waitlist</button>
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <div class="features-header">
+      <div>
+        <div class="section-tag"><span>01</span> What UniVerse offers</div>
+        <h2 class="section-title">Everything you need to feel at home.</h2>
+      </div>
+      <p class="features-intro">
+        Five powerful features designed from the ground up for the international student experience — because adapting to a new country shouldn't mean going it alone.
+      </p>
     </div>
-    <p class="nl-privacy">No spam. Unsubscribe anytime. We respect your privacy.</p>
+
+    <div class="features-grid">
+
+      <div class="feature-card">
+        <div class="feature-number">Feature 01</div>
+        <span class="feature-icon">🤝</span>
+        <div class="feature-name">Connect & Belong</div>
+        <p class="feature-desc">
+          Find students from your country, your course, or your dorm. Build friendships that go beyond the classroom with smart matching.
+        </p>
+        <span class="feature-tag" style="color: var(--accent2);">Social Network</span>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-number">Feature 02</div>
+        <span class="feature-icon">🎉</span>
+        <div class="feature-name">Plan & Explore</div>
+        <p class="feature-desc">
+          Organise weekend trips, movie nights, and study sessions. Discover events happening around campus and your new city.
+        </p>
+        <span class="feature-tag" style="color: var(--accent);">Event Planning</span>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-number">Feature 03</div>
+        <span class="feature-icon">🆘</span>
+        <div class="feature-name">Ask & Get Help</div>
+        <p class="feature-desc">
+          Visa renewal? Bank account? Healthcare? Get answers from students who've already been through it — in your own language.
+        </p>
+        <span class="feature-tag" style="color: #aa6600;">Peer Support</span>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-number">Feature 04</div>
+        <span class="feature-icon">🗺️</span>
+        <div class="feature-name">Student-Picked Map</div>
+        <p class="feature-desc">
+          Forget tourist traps. Discover cafés, restaurants, clinics, and hidden gems rated and recommended by students who live there.
+        </p>
+        <span class="feature-tag" style="color: #226633;">Local Guide</span>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-number">Feature 05</div>
+        <span class="feature-icon">💬</span>
+        <div class="feature-name">Group Chats & Communities</div>
+        <p class="feature-desc">
+          Join groups by nationality, faculty, or interest. Chat, share memes, organise meetups — all in one place, no third-party apps needed.
+        </p>
+        <span class="feature-tag" style="color: var(--accent2);">Messaging</span>
+      </div>
+
+      <div class="feature-card" style="background: var(--ink); color: var(--paper);">
+        <div class="feature-number" style="color: #666">Coming Next</div>
+        <span class="feature-icon">🚀</span>
+        <div class="feature-name">More on the way…</div>
+        <p class="feature-desc" style="color: #aaa;">
+          Language exchange, housing boards, local job listings, and more — all built with students' needs at the core.
+        </p>
+        <span class="feature-tag" style="color: var(--accent3);">Roadmap</span>
+      </div>
+
+    </div>
   </section>
 
-</div><!-- end #app -->
-
-
-<!-- ══ THANK YOU PAGE ══ -->
-<div id="thankyou-page">
-  <canvas id="ty-stars"></canvas>
-  <div class="ty-content">
-    <div class="ty-ring">🚀</div>
-    <div class="ty-logo">UniVerse</div>
-    <h1 class="ty-headline">You're on board!</h1>
-    <p class="ty-email-confirm" id="ty-email-line">We'll reach out to you soon.</p>
-    <p class="ty-sub">Welcome to the community. We're building something special for international students everywhere — and you'll be among the first to experience it.</p>
-    <div class="ty-perks">
-      <span class="ty-perk">✦ Early access</span>
-      <span class="ty-perk">✦ Exclusive updates</span>
-      <span class="ty-perk">✦ Founding member badge</span>
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-item">
+      <span class="stat-number">6.4M</span>
+      <span class="stat-label">International students worldwide</span>
     </div>
+    <div class="stat-item">
+      <span class="stat-number">70%</span>
+      <span class="stat-label">Feel isolated in their first semester</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number">180+</span>
+      <span class="stat-label">Countries represented in our beta</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number">1</span>
+      <span class="stat-label">App to bring them all together</span>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section class="how">
+    <div class="section-tag"><span>02</span> How it works</div>
+    <h2 class="section-title">Up and running in minutes.</h2>
+
+    <div class="how-steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <div class="step-title">Create your profile</div>
+          <p class="step-desc">Sign up with your student email and tell us a bit about yourself — your home country, your field of study, your interests.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-title">Join your communities</div>
+          <p class="step-desc">We match you with students from your university, your country, and your interests. Jump into group chats, browse the map, RSVP to events.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <div class="step-title">Feel at home</div>
+          <p class="step-desc">Plan your first outing, get help with that confusing admin form, discover your new favourite café — all inside UniVerse.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIAL -->
+  <section class="testimonial">
+    <div class="testimonial-inner">
+      <p class="testimonial-quote">"Moving to France for my Master's was terrifying — I didn't know anyone. An app like UniVerse would have changed everything. Finding people who understand what you're going through is priceless."</p>
+      <div class="testimonial-author">
+        <div class="t-avatar">S</div>
+        <span>Sofia M. — Brazilian student studying in Toulouse, France</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUBSCRIBE -->
+  <section class="subscribe" id="subscribe">
+    <div class="subscribe-left">
+      <div class="section-tag"><span>03</span> Be first</div>
+      <h2 class="section-title">Don't just study abroad.<br><em>Thrive</em> abroad.</h2>
+      <p class="subscribe-desc">
+        UniVerse is launching soon. Join the waitlist to get early access, help shape the product, and never feel like a stranger in a strange land again.
+      </p>
+    </div>
+
+    <div class="subscribe-right">
+      <div class="subscribe-form">
+        <div class="form-title">Get Early Access 🎓</div>
+
+        <div class="form-group">
+          <label class="form-label" for="name">Full Name</label>
+          <input class="form-input" type="text" id="name" placeholder="Your name" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Student Email</label>
+          <input class="form-input" type="email" id="email" placeholder="you@university.edu" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="university">University</label>
+          <input class="form-input" type="text" id="university" placeholder="e.g. Université Toulouse Capitole">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="country">Home Country</label>
+          <input class="form-input" type="text" id="country" placeholder="e.g. Lebanon, Brazil, India…">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Features you're most excited about</label>
+          <div class="form-check-group">
+            <label class="form-check">
+              <input type="checkbox" value="connect">
+              <span class="form-check-label">🤝 Connecting with other students</span>
+            </label>
+            <label class="form-check">
+              <input type="checkbox" value="events">
+              <span class="form-check-label">🎉 Planning events & outings</span>
+            </label>
+            <label class="form-check">
+              <input type="checkbox" value="help">
+              <span class="form-check-label">🆘 Getting help with admin & city stuff</span>
+            </label>
+            <label class="form-check">
+              <input type="checkbox" value="map">
+              <span class="form-check-label">🗺️ Student-picked map & places</span>
+            </label>
+            <label class="form-check">
+              <input type="checkbox" value="chat">
+              <span class="form-check-label">💬 Community group chats</span>
+            </label>
+          </div>
+        </div>
+
+        <button class="btn-submit" onclick="handleSubmit()">
+          Join the Waitlist ↗
+        </button>
+
+        <p class="form-privacy">No spam, ever. We'll only email you when it matters.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Uni<span>Verse</span></div>
+    <div class="footer-links">
+      <a href="#">About</a>
+      <a href="#">Privacy</a>
+      <a href="#">Contact</a>
+    </div>
+    <div class="footer-copy">© 2025 UniVerse. Made for students, by students.</div>
+  </footer>
+
+</div><!-- /main-site -->
+
+
+<!-- ── THANK YOU PAGE ── -->
+<div class="thankyou-page" id="thankYouPage">
+  <div class="ty-confetti" id="confettiContainer"></div>
+  <div style="position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center;">
+    <div class="ty-icon">🎉</div>
+    <h1 class="ty-title">You're on the list,<br><em>welcome aboard!</em></h1>
+    <p class="ty-sub">
+      We'll reach out as soon as UniVerse is ready to launch. In the meantime, tell a fellow international student about us — the bigger our community starts, the better it gets.
+    </p>
     <button class="ty-back" onclick="goBack()">← Back to UniVerse</button>
   </div>
 </div>
 
 <script>
-  /* ── STARS (ad) ── */
-  const ad = document.getElementById('universe-ad');
-  const canvas = document.getElementById('stars');
-  const ctx = canvas.getContext('2d');
-  function resizeCanvas(){canvas.width=ad.offsetWidth;canvas.height=ad.offsetHeight;}
-  resizeCanvas();
-  const stars=Array.from({length:180},()=>({x:Math.random(),y:Math.random(),r:Math.random()*1.4+.3,alpha:Math.random()*.7+.3,speed:Math.random()*.4+.1,phase:Math.random()*Math.PI*2}));
-  let t=0;
-  function drawStars(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);t+=.012;
-    stars.forEach(s=>{const a=s.alpha*(.6+.4*Math.sin(t*s.speed+s.phase));ctx.beginPath();ctx.arc(s.x*canvas.width,s.y*canvas.height,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(180,210,255,${a})`;ctx.fill();});
-    requestAnimationFrame(drawStars);
-  }
-  drawStars();
-  window.addEventListener('resize',resizeCanvas);
+  function handleSubmit() {
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
 
-  /* ── STARS (thank you) ── */
-  const tyCanvas=document.getElementById('ty-stars');
-  const tyCtx=tyCanvas.getContext('2d');
-  function resizeTy(){tyCanvas.width=window.innerWidth;tyCanvas.height=window.innerHeight;}
-  resizeTy();
-  const tyStars=Array.from({length:200},()=>({x:Math.random(),y:Math.random(),r:Math.random()*1.5+.3,alpha:Math.random()*.8+.2,speed:Math.random()*.3+.1,phase:Math.random()*Math.PI*2}));
-  let tt=0;
-  function drawTyStars(){
-    tyCtx.clearRect(0,0,tyCanvas.width,tyCanvas.height);tt+=.01;
-    tyStars.forEach(s=>{const a=s.alpha*(.5+.5*Math.sin(tt*s.speed+s.phase));tyCtx.beginPath();tyCtx.arc(s.x*tyCanvas.width,s.y*tyCanvas.height,s.r,0,Math.PI*2);tyCtx.fillStyle=`rgba(180,210,255,${a})`;tyCtx.fill();});
-    requestAnimationFrame(drawTyStars);
-  }
-  drawTyStars();
-  window.addEventListener('resize',resizeTy);
+    if (!name || !email) {
+      document.getElementById('name').style.borderColor = name ? '' : 'var(--accent)';
+      document.getElementById('email').style.borderColor = email ? '' : 'var(--accent)';
+      return;
+    }
 
-  /* ── AD SCENES ── */
-  let currentScene=0;
-  const scenes=[1,2,3,4].map(i=>document.getElementById('scene'+i));
-  const dots=[0,1,2,3].map(i=>document.getElementById('dot'+i));
-  const bar=document.getElementById('progressBar');
-  const SCENE_DURATION=4200;
-  let autoTimer=null;
+    // Show thank you page
+    document.getElementById('mainSite').classList.add('hidden');
+    const ty = document.getElementById('thankYouPage');
+    ty.classList.add('active');
+    window.scrollTo(0, 0);
 
-  function goToScene(n){
-    scenes[currentScene].classList.remove('active');
-    dots[currentScene].classList.remove('active');
-    currentScene=n%4;
-    scenes[currentScene].classList.add('active');
-    dots[currentScene].classList.add('active');
-    if(currentScene===1){['fa1','fa2','fa3','fa4','fa5','fa6'].forEach((id,i)=>{const el=document.getElementById(id);if(el){el.classList.remove('show');setTimeout(()=>el.classList.add('show'),300+i*150);}});}
-    if(currentScene===2){['fc1','fc2','fc3','fc4','fc5'].forEach((id,i)=>{const el=document.getElementById(id);if(el){el.classList.remove('show');setTimeout(()=>el.classList.add('show'),300+i*120);}});}
-    bar.style.transition='none';bar.style.width='0%';
-    requestAnimationFrame(()=>{bar.style.transition=`width ${SCENE_DURATION}ms linear`;bar.style.width='100%';});
+    // Launch confetti
+    launchConfetti();
   }
 
-  function startAuto(){clearInterval(autoTimer);autoTimer=setInterval(()=>goToScene(currentScene+1),SCENE_DURATION);}
-  ad.addEventListener('click',e=>{clearInterval(autoTimer);goToScene(currentScene+1);startAuto();});
-  goToScene(0);startAuto();
-
-  /* ── NEWSLETTER ── */
-  function handleSubscribe(){
-    const name=document.getElementById('nl-name').value.trim();
-    const email=document.getElementById('nl-email').value.trim();
-    if(!name){alert('Please enter your name.');return;}
-    if(!email||!email.includes('@')){alert('Please enter a valid email address.');return;}
-    document.getElementById('ty-email-line').textContent=`Confirmation sent to ${email} — see you soon, ${name}!`;
-    document.getElementById('app').style.display='none';
-    document.getElementById('thankyou-page').classList.add('show');
-    window.scrollTo(0,0);
+  function goBack() {
+    document.getElementById('thankYouPage').classList.remove('active');
+    document.getElementById('mainSite').classList.remove('hidden');
+    document.getElementById('confettiContainer').innerHTML = '';
+    window.scrollTo(0, 0);
   }
 
-  function goBack(){
-    document.getElementById('thankyou-page').classList.remove('show');
-    document.getElementById('app').style.display='flex';
-    document.getElementById('nl-name').value='';
-    document.getElementById('nl-email').value='';
-    window.scrollTo(0,0);
-  }
+  function launchConfetti() {
+    const container = document.getElementById('confettiContainer');
+    container.innerHTML = '';
+    const colors = ['#ff5533','#3366ff','#ffcc00','#22aa44','#ff66cc','#00ccdd'];
 
-  document.getElementById('nl-email').addEventListener('keydown',e=>{if(e.key==='Enter')handleSubscribe();});
+    for (let i = 0; i < 80; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'confetti-dot';
+      dot.style.left = Math.random() * 100 + 'vw';
+      dot.style.top = '-20px';
+      dot.style.background = colors[Math.floor(Math.random() * colors.length)];
+      dot.style.width = (6 + Math.random() * 10) + 'px';
+      dot.style.height = (6 + Math.random() * 10) + 'px';
+      dot.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
+      dot.style.animationDuration = (2 + Math.random() * 3) + 's';
+      dot.style.animationDelay = (Math.random() * 1.5) + 's';
+      container.appendChild(dot);
+    }
+  }
 </script>
+
 </body>
 </html>
